@@ -22,7 +22,7 @@ class RegisterSerializer(serializers.Serializer):
 
         OTP.objects.create(
             user=user,
-            otp="1234"  # STATIC OTP FOR DEV ONLY
+            otp="0089"  # STATIC OTP FOR DEV ONLY
         )
 
         return user

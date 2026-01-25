@@ -100,7 +100,7 @@ class LoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        otp = "123456"
+        otp = "0089"
 
         OTP.objects.update_or_create(
             user=user,
