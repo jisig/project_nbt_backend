@@ -1,6 +1,4 @@
-# from django.shortcuts import render
-#
-# # Create your views here.
+
 import profile
 from array import array
 
@@ -66,28 +64,6 @@ class CreateProfileView(APIView):
             ProfileSerializer(profile).data,
             status=status.HTTP_201_CREATED
         )
-# class CreateProfileView(APIView):
-#     permission_classes = [IsAuthenticated]
-#
-#     def post(self, request):
-#         if Profile.objects.filter(user=request.user).exists():
-#             return Response(
-#                 {"detail": "Profile already exists"},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-#
-#         serializer = ProfileSerializer(
-#             data=request.data,
-#             context={"request": request}
-#         )
-#         serializer.is_valid(raise_exception=True)
-#
-#         profile = serializer.save()
-#
-#         return Response(
-#             ProfileSerializer(profile).data,
-#             status=status.HTTP_201_CREATED
-#         )
 
 from django.contrib.auth import authenticate
 

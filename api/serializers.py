@@ -89,21 +89,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         if Profile.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username already taken")
         return value
-
-
-# class ProfileSerializer(serializers.ModelSerializer):
-#     user_id = serializers.IntegerField(source="user.id", read_only=True)
-#
-#     class Meta:
-#         model = Profile
-#         fields = (
-#             "user_id",
-#             "username",
-#             "display_name",
-#             "vibe",
-#             "pronouns",
-#             "dob",
-#             "city",
-#             "is_active_profile",
-#         )
-
