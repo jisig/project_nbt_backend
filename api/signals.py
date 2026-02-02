@@ -1,4 +1,18 @@
-# api/signals.py
+# # api/signals.py
+# from django.db.models.signals import pre_save
+# from django.dispatch import receiver
+# from .models import Profile
+#
+# @receiver(pre_save, sender=Profile)
+# def handle_profile_disable(sender, instance, **kwargs):
+#     if not instance.pk:
+#         return  # new profile, ignore
+#
+#     old = Profile.objects.get(pk=instance.pk)
+#
+#     # if admin turns OFF the profile
+#     if old.is_active_profile is True and instance.is_active_profile is False:
+#         purge_profile_data(instance)
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from .models import Profile
@@ -6,13 +20,19 @@ from .models import Profile
 @receiver(pre_save, sender=Profile)
 def handle_profile_disable(sender, instance, **kwargs):
     if not instance.pk:
-        return  # new profile, ignore
+        return
 
-    old = Profile.objects.get(pk=instance.pk)
+    try:
+        old = Profile.objects.get(pk=instance.pk)
+    except Profile.DoesNotExist:
+        return
 
-    # if admin turns OFF the profile
-    if old.is_active_profile is True and instance.is_active_profile is False:
-        purge_profile_data(instance)
+    if old.is_active_profile and not instance.is_active_profile:
+        try:
+            purge_profile_data(instance)
+        except Exception:
+            pass
+
 
 
 def purge_profile_data(profile):

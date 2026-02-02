@@ -1,6 +1,8 @@
 # from django.shortcuts import render
 #
 # # Create your views here.
+import profile
+from array import array
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -23,7 +25,7 @@ class RegisterView(APIView):
 
 from .serializers import OTPVerifySerializer
 
-class OTPVerifyView(APIView):
+class   OTPVerifyView(APIView):
     def post(self, request):
         serializer = OTPVerifySerializer(data=request.data)
         if serializer.is_valid():
@@ -31,8 +33,7 @@ class OTPVerifyView(APIView):
             return Response(
                 {
                     "message": "OTP verified",
-                    "tokens": tokens,
-                    "next": "CREATE_PROFILE"
+                    "tokens": tokens
                 }
             )
         return Response(serializer.errors, status=400)
@@ -43,7 +44,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Profile
 from .serializers import ProfileSerializer
-
+#
 class CreateProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -56,7 +57,7 @@ class CreateProfileView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = ProfileSerializer(data=request.data)
+        serializer = ProfileSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
         profile = serializer.save(user=user)
@@ -65,6 +66,28 @@ class CreateProfileView(APIView):
             ProfileSerializer(profile).data,
             status=status.HTTP_201_CREATED
         )
+# class CreateProfileView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request):
+#         if Profile.objects.filter(user=request.user).exists():
+#             return Response(
+#                 {"detail": "Profile already exists"},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#
+#         serializer = ProfileSerializer(
+#             data=request.data,
+#             context={"request": request}
+#         )
+#         serializer.is_valid(raise_exception=True)
+#
+#         profile = serializer.save()
+#
+#         return Response(
+#             ProfileSerializer(profile).data,
+#             status=status.HTTP_201_CREATED
+#         )
 
 from django.contrib.auth import authenticate
 
@@ -123,10 +146,18 @@ class LoginOTPVerifyView(APIView):
         mobile = request.data.get("mobile_number")
         otp = request.data.get("otp")
 
+        if not mobile or not otp:
+            return Response(
+                {"error": "mobile_number and otp are required"},
+                status=400
+            )
+
         try:
             user = User.objects.get(username=mobile)
             otp_obj = OTP.objects.get(user=user, otp=otp, is_verified=False)
-        except:
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+        except OTP.DoesNotExist:
             return Response({"error": "Invalid OTP"}, status=400)
 
         otp_obj.is_verified = True
@@ -134,10 +165,17 @@ class LoginOTPVerifyView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
+        try:
+            profile = Profile.objects.get(user=user)
+            profile_data = ProfileSerializer(profile).data
+        except Profile.DoesNotExist:
+            profile_data = None
+
         return Response({
             "access": str(refresh.access_token),
-            "refresh": str(refresh)
-        })
+            "refresh": str(refresh),
+            "profile": profile_data
+        }, status=200)
 
 # api/views.py
 from rest_framework.views import APIView

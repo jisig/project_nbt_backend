@@ -63,34 +63,47 @@ class OTPVerifySerializer(serializers.Serializer):
 # from rest_framework import serializers
 # from .models import Profile
 
+
+
+
 from rest_framework import serializers
 from .models import Profile
 
-
 class ProfileSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Profile
         fields = (
+            "user",
             "username",
             "display_name",
             "vibe",
             "pronouns",
             "dob",
             "city",
+            "is_active_profile",
         )
 
+    def validate_username(self, value):
+        if Profile.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already taken")
+        return value
 
-    class LoginSerializer(serializers.Serializer):
-        mobile_number = serializers.CharField()
-        password = serializers.CharField()
 
-    # def validate(self, attrs):
-    #     user = self.context["request"].user
-    #
-    #     if hasattr(user, "profile"):
-    #         raise serializers.ValidationError("Profile already exists")
-    #
-    #     if not user.is_active:
-    #         raise serializers.ValidationError("User is not verified")
-    #
-    #     return attrs
+# class ProfileSerializer(serializers.ModelSerializer):
+#     user_id = serializers.IntegerField(source="user.id", read_only=True)
+#
+#     class Meta:
+#         model = Profile
+#         fields = (
+#             "user_id",
+#             "username",
+#             "display_name",
+#             "vibe",
+#             "pronouns",
+#             "dob",
+#             "city",
+#             "is_active_profile",
+#         )
+
