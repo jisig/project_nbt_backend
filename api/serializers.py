@@ -17,7 +17,9 @@ class RegisterSerializer(serializers.Serializer):
         user = User.objects.create_user(
             username=validated_data["mobile"],
             password=validated_data["password"],
-            is_active=False
+            is_active=False,
+            is_staff=False,
+            is_superuser=False,
         )
 
         OTP.objects.create(
@@ -47,6 +49,8 @@ class OTPVerifySerializer(serializers.Serializer):
     def create(self, validated_data):
         user = validated_data["user"]
         user.is_active = True
+        user.is_staff = False
+        user.is_superuser = False
         user.save()
 
         otp_obj = OTP.objects.get(user=user)

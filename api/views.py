@@ -14,8 +14,8 @@ class RegisterView(APIView):
             serializer.save()
             return Response(
                 {
+                    "otp_required": True,
                     "message": "OTP sent",
-                    "next": "OTP_VERIFICATION"
                 },
                 status=status.HTTP_201_CREATED
             )
