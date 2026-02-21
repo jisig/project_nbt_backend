@@ -30,9 +30,12 @@ class   OTPVerifyView(APIView):
             tokens = serializer.save()
             return Response(
                 {
-                    "message": "OTP verified",
-                    "tokens": tokens
-                }
+                    "message": "Verification Successful",
+                    "sub_message": "Please proceed to complete your profile.",
+                    # "tokens": tokens
+                    "access": tokens["access"],
+                    "refresh": tokens["refresh"],
+                }, status=200
             )
         return Response(serializer.errors, status=400)
 
@@ -148,6 +151,8 @@ class LoginOTPVerifyView(APIView):
             profile_data = None
 
         return Response({
+            "message": "Verification Successful",
+            "sub_message": "You have logged in successfully.",
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "profile": profile_data
